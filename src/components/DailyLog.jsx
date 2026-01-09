@@ -3,22 +3,47 @@
 // Using native Intl for now to avoid dependency add (unless I add date-fns). 
 // User requested "local", native is safer unless complex formatting needed.
 
+import { getWorkDay } from '../lib/storage';
+import { calculateExpectedMinutes, formatDuration } from '../lib/utils';
+
 export default function DailyLog({ entries, projects, onDelete }) {
     const getProject = (id) => projects.find(p => p.id === id);
 
     // Filter for today? Or parent passes filtered? Let's filter for today here for safety
     // or assume parent handles date context. For "Daily Log", let's show today's entries.
 
-    const today = new Date().toDateString();
+    const today = new Date().toDateString(); // For display/logic
+    const todayISO = new Date().toISOString().split('T')[0]; // For storage keys
+
     const todaysEntries = entries.filter(e => new Date(e.date).toDateString() === today)
         .sort((a, b) => new Date(b.date) - new Date(a.date)); // Newest first
 
     const totalMinutes = todaysEntries.reduce((sum, entry) => sum + entry.durationMinutes, 0);
 
+    // Work Day Calculation
+    const workDay = getWorkDay(todayISO);
+    let comparison = null;
+    if (workDay) {
+        const expectedMinutes = calculateExpectedMinutes(workDay.startTime, workDay.endTime, workDay.lunchDuration);
+        if (expectedMinutes > 0) {
+            const diff = totalMinutes - expectedMinutes;
+            const diffColor = diff >= 0 ? 'var(--success)' : 'var(--danger)';
+            comparison = (
+                <span style={{ fontSize: '14px', fontWeight: 'normal', color: 'var(--text-secondary)', marginLeft: '12px' }}>
+                    Target: {formatDuration(expectedMinutes)} | Diff: <span style={{ color: diffColor, fontWeight: 'bold' }}>{diff > 0 ? '+' : ''}{formatDuration(diff)}</span>
+                </span>
+            );
+        }
+    }
+
     return (
         <div className="card" style={{ marginTop: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2>Today's Log <span style={{ fontSize: '16px', fontWeight: 'normal', color: 'var(--text-secondary)' }}>({Math.floor(totalMinutes / 60)}h {totalMinutes % 60}m)</span></h2>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                    <h2>Today's Log</h2>
+                    <span style={{ fontSize: '16px', fontWeight: 'normal', color: 'var(--text-secondary)' }}>({formatDuration(totalMinutes)})</span>
+                    {comparison}
+                </div>
                 {todaysEntries.length > 0 && onDelete && (
                     <button
                         onClick={() => {
