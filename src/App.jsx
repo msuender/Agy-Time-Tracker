@@ -3,6 +3,7 @@ import ProjectManager from './components/ProjectManager'
 import ManualEntry from './components/ManualEntry'
 import DailyLog from './components/DailyLog'
 import ConsolidatedView from './components/ConsolidatedView'
+import WorkDayCalculator from './components/WorkDayCalculator'
 import { getProjects, getEntries, deleteEntry, deleteEntries } from './lib/storage'
 import './App.css'
 
@@ -74,6 +75,7 @@ function App() {
 
         {activeTab === 'tracker' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <WorkDayCalculator />
             <ManualEntry projects={projects} onEntryAdded={loadData} />
             <DailyLog entries={entries} projects={projects} onDelete={handleDeleteEntry} />
           </div>

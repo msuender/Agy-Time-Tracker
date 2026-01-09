@@ -1,6 +1,7 @@
 const STORAGE_KEYS = {
   PROJECTS: 'tracker_projects',
-  ENTRIES: 'tracker_entries'
+  ENTRIES: 'tracker_entries',
+  WORK_DAYS: 'tracker_work_days'
 };
 
 export const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -61,4 +62,26 @@ export const deleteEntries = (ids) => {
   const entries = getEntries().filter(e => !ids.includes(e.id));
   localStorage.setItem(STORAGE_KEYS.ENTRIES, JSON.stringify(entries));
   return entries;
+};
+
+// Work Days
+export const getWorkDays = () => {
+  const data = localStorage.getItem(STORAGE_KEYS.WORK_DAYS);
+  return data ? JSON.parse(data) : {};
+};
+
+export const getWorkDay = (date) => {
+  const allDays = getWorkDays();
+  return allDays[date] || null;
+};
+
+export const saveWorkDay = (date, data) => {
+  const allDays = getWorkDays();
+  if (data === null) {
+      delete allDays[date];
+  } else {
+      allDays[date] = data;
+  }
+  localStorage.setItem(STORAGE_KEYS.WORK_DAYS, JSON.stringify(allDays));
+  return allDays[date];
 };
