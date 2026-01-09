@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getWorkDay, saveWorkDay } from '../lib/storage';
 
 export default function WorkDayCalculator({ onUpdate }) {
@@ -6,6 +6,7 @@ export default function WorkDayCalculator({ onUpdate }) {
     const [endTime, setEndTime] = useState('');
     const [lunchDuration, setLunchDuration] = useState(30);
     const [totalWorkTime, setTotalWorkTime] = useState('');
+    const isLoaded = useRef(false);
 
     const today = new Date().toISOString().split('T')[0];
 
@@ -16,14 +17,23 @@ export default function WorkDayCalculator({ onUpdate }) {
             setEndTime(data.endTime || '');
             setLunchDuration(data.lunchDuration !== undefined ? data.lunchDuration : 30);
         }
+        isLoaded.current = true;
     }, [today]);
 
     useEffect(() => {
         calculateTotal();
-        // Save to storage on every change
-        if (startTime || endTime || lunchDuration !== 30) {
-            saveWorkDay(today, { startTime, endTime, lunchDuration });
-            if (onUpdate) onUpdate();
+
+        // Only save changes after initial load is complete
+        if (isLoaded.current) {
+            if (startTime || endTime || lunchDuration !== 30) {
+                saveWorkDay(today, { startTime, endTime, lunchDuration });
+                if (onUpdate) onUpdate();
+            } else {
+                // If everything is empty/default, ensure it's cleared from storage
+                // This handles the case where user backspaces everything
+                saveWorkDay(today, null);
+                if (onUpdate) onUpdate();
+            }
         }
     }, [startTime, endTime, lunchDuration]);
     const calculateTotal = () => {
@@ -59,8 +69,7 @@ export default function WorkDayCalculator({ onUpdate }) {
             setStartTime('');
             setEndTime('');
             setLunchDuration(30);
-            saveWorkDay(today, null); // Remove from storage
-            if (onUpdate) onUpdate();
+            // Storage update and onUpdate callback will be handled by the useEffect
         }
     };
 
@@ -68,7 +77,7 @@ export default function WorkDayCalculator({ onUpdate }) {
         <div className="card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                 <h2>Work Day</h2>
-                <button className="btn btn-secondary" onClick={handleClear} style={{ fontSize: '12px', padding: '4px 8px' }}>Clear</button>
+                <button type="button" className="btn btn-secondary" onClick={handleClear} style={{ fontSize: '12px', padding: '4px 8px' }}>Clear</button>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '16px' }}>
