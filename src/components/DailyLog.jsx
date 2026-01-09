@@ -13,10 +13,12 @@ export default function DailyLog({ entries, projects, onDelete }) {
     const todaysEntries = entries.filter(e => new Date(e.date).toDateString() === today)
         .sort((a, b) => new Date(b.date) - new Date(a.date)); // Newest first
 
+    const totalMinutes = todaysEntries.reduce((sum, entry) => sum + entry.durationMinutes, 0);
+
     return (
         <div className="card" style={{ marginTop: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2>Today's Log</h2>
+                <h2>Today's Log <span style={{ fontSize: '16px', fontWeight: 'normal', color: 'var(--text-secondary)' }}>({Math.floor(totalMinutes / 60)}h {totalMinutes % 60}m)</span></h2>
                 {todaysEntries.length > 0 && onDelete && (
                     <button
                         onClick={() => {

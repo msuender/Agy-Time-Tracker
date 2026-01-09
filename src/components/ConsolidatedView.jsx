@@ -17,9 +17,11 @@ export default function ConsolidatedView({ entries, projects }) {
         return acc;
     }, {});
 
+    const totalMinutes = todaysEntries.reduce((sum, entry) => sum + entry.durationMinutes, 0);
+
     return (
         <div className="card" style={{ marginTop: '24px' }}>
-            <h2>Consolidated Report</h2>
+            <h2>Consolidated Report <span style={{ fontSize: '16px', fontWeight: 'normal', color: 'var(--text-secondary)' }}>({Math.floor(totalMinutes / 60)}h {totalMinutes % 60}m)</span></h2>
             <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {Object.keys(summary).map(projectId => {
                     const project = projects.find(p => p.id === projectId) || { name: 'Unknown', color: '#ccc' };
