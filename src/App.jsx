@@ -4,22 +4,29 @@ import ManualEntry from './components/ManualEntry'
 import DailyLog from './components/DailyLog'
 import ConsolidatedView from './components/ConsolidatedView'
 import WorkDayCalculator from './components/WorkDayCalculator'
-import { getProjects, getEntries, deleteEntry, deleteEntries } from './lib/storage'
+import { getProjects, getEntries, deleteEntry, deleteEntries, saveEntry, getWorkDays } from './lib/storage'
 import './App.css'
 
 function App() {
   const [activeTab, setActiveTab] = useState('tracker');
   const [projects, setProjects] = useState([]);
   const [entries, setEntries] = useState([]);
+  const [workDays, setWorkDays] = useState({});
 
   const loadData = () => {
     setProjects(getProjects());
     setEntries(getEntries());
+    setWorkDays(getWorkDays());
   };
 
   useEffect(() => {
     loadData();
   }, []);
+
+  const handleUpdateEntry = (updatedEntry) => {
+    saveEntry(updatedEntry);
+    loadData();
+  };
 
   const handleDeleteEntry = (idOrIds) => {
     if (Array.isArray(idOrIds)) {
@@ -29,6 +36,9 @@ function App() {
     }
     loadData();
   };
+
+  const todayISO = new Date().toISOString().split('T')[0];
+  const currentWorkDay = workDays[todayISO];
 
   return (
     <div className="container">
@@ -75,14 +85,20 @@ function App() {
 
         {activeTab === 'tracker' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <WorkDayCalculator />
+            <WorkDayCalculator onUpdate={loadData} />
             <ManualEntry projects={projects} onEntryAdded={loadData} />
-            <DailyLog entries={entries} projects={projects} onDelete={handleDeleteEntry} />
+            <DailyLog
+              entries={entries}
+              projects={projects}
+              workDay={currentWorkDay}
+              onDelete={handleDeleteEntry}
+              onUpdate={handleUpdateEntry}
+            />
           </div>
         )}
 
         {activeTab === 'summary' && (
-          <ConsolidatedView entries={entries} projects={projects} />
+          <ConsolidatedView entries={entries} projects={projects} workDay={currentWorkDay} />
         )}
       </main>
     </div>

@@ -1,7 +1,6 @@
-import { getWorkDay } from '../lib/storage';
 import { calculateExpectedMinutes, formatDuration } from '../lib/utils';
 
-export default function ConsolidatedView({ entries, projects }) {
+export default function ConsolidatedView({ entries, projects, workDay }) {
     const today = new Date().toDateString();
     const todaysEntries = entries.filter(e => new Date(e.date).toDateString() === today);
 
@@ -25,8 +24,6 @@ export default function ConsolidatedView({ entries, projects }) {
     // Work Day Calculation - Reusing logic
     // In a real app we might hoist this up to App.jsx or context to avoid duplicate reads,
     // but for this scale, reading from localStorage again is fine and safe.
-    const todayISO = new Date().toISOString().split('T')[0];
-    const workDay = getWorkDay(todayISO);
     let comparison = null;
     if (workDay) {
         const expectedMinutes = calculateExpectedMinutes(workDay.startTime, workDay.endTime, workDay.lunchDuration);

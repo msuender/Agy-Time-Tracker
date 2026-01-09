@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getWorkDay, saveWorkDay } from '../lib/storage';
 
-export default function WorkDayCalculator() {
+export default function WorkDayCalculator({ onUpdate }) {
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
     const [lunchDuration, setLunchDuration] = useState(30);
@@ -23,9 +23,9 @@ export default function WorkDayCalculator() {
         // Save to storage on every change
         if (startTime || endTime || lunchDuration !== 30) {
             saveWorkDay(today, { startTime, endTime, lunchDuration });
+            if (onUpdate) onUpdate();
         }
     }, [startTime, endTime, lunchDuration]);
-
     const calculateTotal = () => {
         if (!startTime || !endTime) {
             setTotalWorkTime('');
@@ -54,13 +54,13 @@ export default function WorkDayCalculator() {
 
         setTotalWorkTime(`${hours}h ${minutes}m`);
     };
-
     const handleClear = () => {
         if (confirm('Clear work day settings?')) {
             setStartTime('');
             setEndTime('');
             setLunchDuration(30);
             saveWorkDay(today, null); // Remove from storage
+            if (onUpdate) onUpdate();
         }
     };
 
