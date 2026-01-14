@@ -33,7 +33,7 @@ export const generateSchedule = (startTime, lunchDuration, items) => {
     const startOfWork = new Date(cursor.getTime());
     const schedule = [];
     let lunchAdded = false;
-    const workLimitMs = 6 * 60 * 60 * 1000; // 6 hours in ms
+    const workLimitMs = 5 * 60 * 60 * 1000; // 6 hours in ms
 
     // Helper to format time as HH:MM
     const formatTime = (date) => {
