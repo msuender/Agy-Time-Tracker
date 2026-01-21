@@ -54,8 +54,27 @@ export default function ConsolidatedView({ entries, projects, workDay }) {
         }
     }
 
+
     const handleCopy = (text) => {
         navigator.clipboard.writeText(text);
+    };
+
+    const handleCopyToWorkday = () => {
+        const data = schedule
+            .filter(item => item.type !== 'break')
+            .map(item => ({
+                date: new Date().toISOString().split('T')[0], // Assuming today for all entries
+                project: item.projectName,
+                startTime: item.start,
+                endTime: item.end,
+                comment: item.comments,
+                location: 'Office' // Default per requirement
+            }));
+
+        const json = JSON.stringify(data, null, 2);
+        navigator.clipboard.writeText(json).then(() => {
+            alert('Workday data copied to clipboard!');
+        });
     };
 
     return (
@@ -97,7 +116,18 @@ export default function ConsolidatedView({ entries, projects, workDay }) {
             {/* Booking Proposal Card */}
             {schedule.length > 0 && (
                 <div className="card">
-                    <h3 style={{ fontSize: '18px', marginBottom: '16px' }}>Booking Proposal</h3>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                        <h3 style={{ fontSize: '18px', margin: 0 }}>
+                            Booking Proposal ({schedule.filter(item => item.type !== 'break').length})
+                        </h3>
+                        <button
+                            className="btn btn-primary"
+                            onClick={handleCopyToWorkday}
+                            style={{ fontSize: '14px', padding: '6px 12px' }}
+                        >
+                            Copy for Workday
+                        </button>
+                    </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {schedule.map((item, index) => {
                             if (item.type === 'break') {
