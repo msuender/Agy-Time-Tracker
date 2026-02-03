@@ -85,3 +85,22 @@ export const saveWorkDay = (date, data) => {
   localStorage.setItem(STORAGE_KEYS.WORK_DAYS, JSON.stringify(allDays));
   return allDays[date];
 };
+
+// History helpers
+export const getDatesWithEntries = () => {
+  const entries = getEntries();
+  const today = new Date().toISOString().split('T')[0];
+  const dates = new Set(
+    entries
+      .map(e => new Date(e.date).toISOString().split('T')[0])
+      .filter(d => d !== today)
+  );
+  return Array.from(dates).sort().reverse(); // Most recent first
+};
+
+export const getEntriesForDate = (dateStr) => {
+  const entries = getEntries();
+  return entries.filter(e =>
+    new Date(e.date).toISOString().split('T')[0] === dateStr
+  );
+};

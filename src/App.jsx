@@ -3,6 +3,7 @@ import ProjectManager from './components/ProjectManager'
 import ManualEntry from './components/ManualEntry'
 import DailyLog from './components/DailyLog'
 import ConsolidatedView from './components/ConsolidatedView'
+import HistoryView from './components/HistoryView'
 import WorkDayCalculator from './components/WorkDayCalculator'
 import { getProjects, getEntries, deleteEntry, deleteEntries, saveEntry, getWorkDays } from './lib/storage'
 import './App.css'
@@ -70,6 +71,12 @@ function App() {
             Summary
           </button>
           <button
+            className={`btn ${activeTab === 'history' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setActiveTab('history')}
+          >
+            History
+          </button>
+          <button
             className={`btn ${activeTab === 'projects' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setActiveTab('projects')}
           >
@@ -99,6 +106,10 @@ function App() {
 
         {activeTab === 'summary' && (
           <ConsolidatedView entries={entries} projects={projects} workDay={currentWorkDay} />
+        )}
+
+        {activeTab === 'history' && (
+          <HistoryView projects={projects} workDays={workDays} />
         )}
       </main>
     </div>
